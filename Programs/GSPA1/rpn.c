@@ -7,6 +7,8 @@
 #include "token.h"
 #include <limits.h>
 
+#define TRUE 1
+
 static int addOverflow(int a, int b);
 static int subOverflow(int a, int b);
 static int multOverflow(int a, int b);
@@ -24,7 +26,7 @@ static void intToString(int value, char *s);
 void runCalculator() {
   T_token currentToken;
 
-  while (1) {
+  while (TRUE) {
     currentToken = nextToken();
     switch (currentToken.tok) {
     case NUMBER:
