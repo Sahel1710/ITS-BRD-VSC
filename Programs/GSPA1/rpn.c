@@ -32,16 +32,35 @@ void runCalculator() {
         handle_error(ERR_Stack_Overflow);
       }
       break;
-    case PLUS:    calcAdd(); break;
-    case MINUS:   calcSub(); break;
-    case MULT:    calcMult(); break;
-    case DIV:     calcDiv(); break;
-    case PRT:     calcPrintTop(); break;
-    case PRT_ALL: calcPrintAll(); break;
-    case CLEAR:   calcClear(); break;
-    case DOUBLE:  calcDuplicate(); break;
-    case SWAP:    calcSwap(); break;
-    default:      break;
+    case PLUS:
+      calcAdd();
+      break;
+    case MINUS:
+      calcSub();
+      break;
+    case MULT:
+      calcMult();
+      break;
+    case DIV:
+      calcDiv();
+      break;
+    case PRT:
+      calcPrintTop();
+      break;
+    case PRT_ALL:
+      calcPrintAll();
+      break;
+    case CLEAR:
+      calcClear();
+      break;
+    case DOUBLE:
+      calcDuplicate();
+      break;
+    case SWAP:
+      calcSwap();
+      break;
+    default:
+      break;
     }
   }
 }
@@ -171,7 +190,7 @@ static int multOverflow(int a, int b) {
 
 static void calcPrintTop(void) {
   int value = 0;
-  char buffer[20] = {0};
+  char buffer[STRING_BUFFER_SIZE] = {0};
 
   if (pop(&value) == SUCCESS) {
     intToString(value, buffer);
@@ -185,20 +204,19 @@ static void calcPrintTop(void) {
 
 static void calcPrintAll(void) {
   int value = 0;
-  char buffer[20] = {0};
-  int tempStack[MAX_STACK_SIZE];
-  int tempSp = 0;
+  int i = 0;
+  int size = 0;
+  char buffer[STRING_BUFFER_SIZE] = {0};
+  size = getStackSize();
 
-  while (pop(&value) == SUCCESS) {
-    intToString(value, buffer);
-    printStdout(buffer);
-    printStdout("\n");
-    tempStack[tempSp] = value;
-    tempSp = (tempSp + 1);
-  }
-
-  for (int i = (tempSp - 1); i >= 0; i = (i - 1)) {
-    push(tempStack[i]);
+  /* Mit getStackElement lesen wir den Stack zerstörungsfrei von oben nach unten
+   */
+  for (i = (size - 1); i >= 0; i = (i - 1)) {
+    if (getStackElement(i, &value) == SUCCESS) {
+      intToString(value, buffer);
+      printStdout(buffer);
+      printStdout("\n");
+    }
   }
 }
 
@@ -238,9 +256,9 @@ static void intToString(int value, char *s) {
   long num = (long)value;
 
   if (num == 0) {
-    s[i++] = '0';
+    s[i] = '0';
+    i = (i + 1);
     s[i] = '\0';
-    return;
   } else {
     if (num < 0) {
       negative = 1;
@@ -249,12 +267,14 @@ static void intToString(int value, char *s) {
   }
 
   while (num > 0) {
-    s[i++] = (int)((num % 10) + '0');
-    num = num / 10;
+    s[i] = (int)((num % 10) + '0');
+    i = (i + 1);
+    num = (num / 10);
   }
 
-  if (negative) {
-    s[i++] = '-';
+  if (negative != 0) {
+    s[i] = '-';
+    i = (i + 1);
   }
   s[i] = '\0';
 
@@ -264,7 +284,7 @@ static void intToString(int value, char *s) {
     char temp = s[start];
     s[start] = s[end];
     s[end] = temp;
-    start++;
-    end--;
+    start = (start + 1);
+    end = (end - 1);
   }
 }
