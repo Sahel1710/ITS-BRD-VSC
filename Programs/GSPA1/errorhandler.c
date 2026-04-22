@@ -2,8 +2,14 @@
 #include "display.h"
 #include "scanner.h"
 #include "stack.h"
+#include "error_codes.h"
+#include "token.h"
 
 void handle_error(int errCode) {
+    T_token tok;
+    tok.tok = 0;
+    tok.val = 0;
+    
     setErrMode();
     switch(errCode) {
         case ERR_Overflow:
@@ -27,7 +33,6 @@ void handle_error(int errCode) {
 
     printStdout("Press 'C' to reset.\n");
 
-    T_token tok;
     do {
         tok = nextToken();
     } while(tok.tok != CLEAR);

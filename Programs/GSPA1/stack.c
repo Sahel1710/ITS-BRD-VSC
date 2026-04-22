@@ -1,7 +1,8 @@
 #include "stack.h"
+#include "error_codes.h"
 
 static int stack[MAX_STACK_SIZE] = {0};
-static int sp = 0;
+static int sp = 0; /* Stackpointer zeigt auf den nächsten freien Platz */
 
 int push(int value) {
   int status = SUCCESS;
@@ -27,9 +28,13 @@ int pop(int *value) {
   return status;
 }
 
-void clearStack(void) { sp = 0; }
+void clearStack(void) {
+  sp = 0; 
+}
 
-int getStackSize(void) { return sp; }
+int getStackSize(void) {
+  return sp; 
+}
 
 int getStackElement(int index, int *value) {
   int status = SUCCESS;

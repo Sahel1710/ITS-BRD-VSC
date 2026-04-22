@@ -4,12 +4,11 @@
 #include "scanner.h"
 #include "stack.h"
 #include <limits.h>
+#include "error_codes.h"
 
 #define TRUE 1
+#define STRING_BUFFER_SIZE 20
 
-static int addOverflow(int a, int b);
-static int subOverflow(int a, int b);
-static int multOverflow(int a, int b);
 static void calcAdd(void);
 static void calcSub(void);
 static void calcMult(void);
@@ -20,6 +19,11 @@ static void calcClear(void);
 static void calcDuplicate(void);
 static void calcSwap(void);
 static void intToString(int value, char *s);
+
+static int addOverflow(int a, int b);
+static int subOverflow(int a, int b);
+static int multOverflow(int a, int b);
+
 
 void runCalculator() {
   T_token currentToken;
@@ -209,8 +213,6 @@ static void calcPrintAll(void) {
   char buffer[STRING_BUFFER_SIZE] = {0};
   size = getStackSize();
 
-  /* Mit getStackElement lesen wir den Stack zerstörungsfrei von oben nach unten
-   */
   for (i = (size - 1); i >= 0; i = (i - 1)) {
     if (getStackElement(i, &value) == SUCCESS) {
       intToString(value, buffer);
