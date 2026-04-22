@@ -1,9 +1,7 @@
-#include "error_codes.h"
 #include "errorhandler.h"
 #include "display.h"
 #include "scanner.h"
 #include "stack.h"
-#include "token.h"
 
 void handle_error(int errCode) {
     setErrMode();

@@ -1,7 +1,4 @@
 #include "stack.h"
-#include "errorhandler.h"
-
-#include <limits.h>
 
 static int stack[MAX_STACK_SIZE] = {0};
 static int sp = 0;

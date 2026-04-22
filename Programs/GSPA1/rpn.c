@@ -1,10 +1,8 @@
 #include "rpn.h"
 #include "display.h"
-#include "error_codes.h"
 #include "errorhandler.h"
 #include "scanner.h"
 #include "stack.h"
-#include "token.h"
 #include <limits.h>
 
 #define TRUE 1
