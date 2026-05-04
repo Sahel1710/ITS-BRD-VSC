@@ -1,212 +1,186 @@
 #include "rpn.h"
 #include "display.h"
-#include "errorhandler.h"
+#include "error_codes.h"
 #include "scanner.h"
 #include "stack.h"
+#include "token.h"
 #include <limits.h>
-#include <stdlib.h>
-#include "error_codes.h"
+
 
 #define TRUE 1
 #define STRING_BUFFER_SIZE 20
 
-static void calcAdd(void);
-static void calcSub(void);
-static void calcMult(void);
-static void calcDiv(void);
-static void calcPrintTop(void);
-static void calcPrintAll(void);
-static void calcClear(void);
-static void calcDuplicate(void);
-static void calcSwap(void);
+static int calcAdd(void);
+static int calcSub(void);
+static int calcMult(void);
+static int calcDiv(void);
+static int calcPrintTop(void);
+static int calcPrintAll(void);
+static int calcClear(void);
+static int calcDuplicate(void);
+static int calcSwap(void);
 static void intToString(int num, char *s);
 static int addOverflow(int a, int b);
 static int subOverflow(int a, int b);
 static int multOverflow(int a, int b);
 
-
-void runCalculator() {
+int runCalculator() {
   T_token currentToken;
 
-  while (TRUE) {
     currentToken = nextToken();
     switch (currentToken.tok) {
     case NUMBER:
-      if (push(currentToken.val) != SUCCESS) {
-        handle_error(ERR_Stack_Overflow);
-      }
-      break;
+      return push(currentToken.val);
     case PLUS:
-      calcAdd();
-      break;
+      return calcAdd();
     case MINUS:
-      calcSub();
-      break;
+      return calcSub();
     case MULT:
-      calcMult();
-      break;
+      return calcMult();
     case DIV:
-      calcDiv();
-      break;
+      return calcDiv();
     case PRT:
-      calcPrintTop();
-      break;
+      return calcPrintTop();
     case PRT_ALL:
-      calcPrintAll();
-      break;
+      return calcPrintAll();
     case CLEAR:
-      calcClear();
-      break;
+      return calcClear();
     case DOUBLE:
-      calcDuplicate();
-      break;
+      return calcDuplicate();
     case SWAP:
-      calcSwap();
-      break;
+      return calcSwap();
     default:
-      break;
+      return UNEXPECTED;
     }
-  }
+  return SUCCESS;
 }
 
-static void calcAdd(void) {
+static int calcAdd(void) {
   int a = 0;
   int b = 0;
   int status = SUCCESS;
 
-  if ((pop(&a) == SUCCESS) && (pop(&b) == SUCCESS)) {
-    status = addOverflow(b, a);
-    if (status != SUCCESS) {
-      handle_error(status);
-    } else {
-      push(a + b);
-    }
-  } else {
-    handle_error(ERR_Stack_Underflow);
+  if ((status = pop(&a)) != SUCCESS) {
+    return status;
   }
+  if ((status = pop(&b)) != SUCCESS) {
+    return status;
+  }
+  if ((status = addOverflow(a, b)) != SUCCESS) {
+    return status;
+  }
+  return push(b + a);
 }
 
-static void calcSub(void) {
+static int calcSub(void) {
   int a = 0;
   int b = 0;
   int status = SUCCESS;
 
-  if ((pop(&a) == SUCCESS) && (pop(&b) == SUCCESS)) {
-    status = subOverflow(b, a);
-    if (status != SUCCESS) {
-      handle_error(status);
-    } else {
-      push(b - a);
-    }
-  } else {
-    handle_error(ERR_Stack_Underflow);
+  if ((status = pop(&a)) != SUCCESS) {
+    return status;
   }
+  if ((status = pop(&b)) != SUCCESS) {
+    return status;
+  }
+  if ((status = subOverflow(a, b)) != SUCCESS) {
+    return status;
+  }
+  return push(b - a);
 }
 
-static void calcMult(void) {
+static int calcMult(void) {
   int a = 0;
   int b = 0;
   int status = SUCCESS;
 
-  if ((pop(&a) == SUCCESS) && (pop(&b) == SUCCESS)) {
-    status = multOverflow(b, a);
-    if (status != SUCCESS) {
-      handle_error(status);
-    } else {
-      push(b * a);
-    }
-  } else {
-    handle_error(ERR_Stack_Underflow);
+  if ((status = pop(&a)) != SUCCESS) {
+    return status;
   }
+  if ((status = pop(&b)) != SUCCESS) {
+    return status;
+  }
+  if ((status = multOverflow(a, b)) != SUCCESS) {
+    return status;
+  }
+  return push(b * a);
 }
 
-static void calcDiv(void) {
+static int calcDiv(void) {
   int divisor = 0;
   int dividend = 0;
+  int status = SUCCESS;
 
-  if ((pop(&divisor) == SUCCESS) && (pop(&dividend) == SUCCESS)) {
-    if (divisor == 0) {
-      handle_error(ERR_DIV_BY_ZERO);
-    } else if ((dividend == INT_MIN) && (divisor == -1)) {
-      handle_error(ERR_Overflow);
-    } else {
-      push(dividend / divisor);
-    }
-  } else {
-    handle_error(ERR_Stack_Underflow);
+  if ((status = pop(&divisor)) != SUCCESS) {
+    return status;
   }
+  if ((status = pop(&dividend)) != SUCCESS) {
+    return status;
+  }
+  if (divisor == 0) {
+    return ERR_DIV_BY_ZERO;
+  }
+  if ((dividend == INT_MIN) && (divisor == -1)) {
+    return ERR_OVERFLOW;
+  }
+  return push(dividend / divisor);
 }
 
 static int addOverflow(int a, int b) {
-  int error = SUCCESS;
-
   if ((a > 0) && (b > (INT_MAX - a))) {
-    error = ERR_Overflow;
+    return ERR_OVERFLOW;
   }
 
   if ((a < 0) && (b < (INT_MIN - a))) {
-    error = ERR_Underflow;
+    return ERR_UNDERFLOW;
   }
-  return error;
+  return SUCCESS;
 }
 
 static int subOverflow(int a, int b) {
-  int error = SUCCESS;
-
   if ((b < 0) && (a > (INT_MAX + b))) {
-    error = ERR_Overflow;
+    return ERR_OVERFLOW;
   }
-
   if ((b > 0) && (a < (INT_MIN + b))) {
-    error = ERR_Underflow;
+    return ERR_UNDERFLOW;
   }
-  return error;
+  return SUCCESS;
 }
 
 static int multOverflow(int a, int b) {
-  int error = SUCCESS;
-
-  if ((a != 0) && (b != 0)) {
-    if (a > 0) {
-      if (b > 0) {
-        if (a > (INT_MAX / b)) {
-          error = ERR_Overflow;
-        }
-      } else {
-        if (b < (INT_MIN / a)) {
-          error = ERR_Underflow;
-        }
-      }
-    } else {
-      if (b > 0) {
-        if (a < (INT_MIN / b)) {
-          error = ERR_Underflow;
-        }
-      } else {
-        if (a < (INT_MAX / b)) {
-          error = ERR_Overflow;
-        }
-      }
-    }
+  if ((a == 0) && (b == 0)) {
+    return SUCCESS;
   }
-  return error;
+  if ((a > 0) && (b > 0) && (a > (INT_MAX / b))) {
+    return ERR_OVERFLOW;
+  }
+  if ((a < 0) && (b < 0) && (a < (INT_MAX / b))) {
+    return ERR_OVERFLOW;
+  }
+  if ((a > 0) && (b < 0) && (b < (INT_MIN / a))) {
+    return ERR_UNDERFLOW;
+  }
+  if ((a < 0) && (b > 0) && (a < (INT_MIN / b))) {
+    return ERR_UNDERFLOW;
+  }
+  return SUCCESS;
 }
 
-static void calcPrintTop(void) {
+static int calcPrintTop(void) {
   int value = 0;
+  int status = SUCCESS;
   char buffer[STRING_BUFFER_SIZE] = {0};
 
-  if (pop(&value) == SUCCESS) {
-    intToString(value, buffer);
-    printStdout(buffer);
-    printStdout("\n");
-    push(value);
-  } else {
-    handle_error(ERR_Stack_Underflow);
+  if ((status = getStackElement(getStackSize() - 1, &value)) != SUCCESS) {
+    return ERR_STACK_UNDERFLOW;
   }
+  intToString(value, buffer);
+  printStdout(buffer);
+  printStdout("\n");
+  return SUCCESS;
 }
 
-static void calcPrintAll(void) {
+static int calcPrintAll(void) {
   int value = 0;
   int i = 0;
   int size = 0;
@@ -220,36 +194,40 @@ static void calcPrintAll(void) {
       printStdout("\n");
     }
   }
+  return SUCCESS;
 }
 
-static void calcClear(void) {
+static int calcClear(void) {
   clearStack();
   clearStdout();
   setNormalMode();
+  return SUCCESS;
 }
 
-static void calcDuplicate(void) {
+static int calcDuplicate(void) {
   int value = 0;
-  if (pop(&value) == SUCCESS) {
-    push(value);
-    if (push(value) != SUCCESS) {
-      handle_error(ERR_Stack_Overflow);
-    }
-  } else {
-    handle_error(ERR_Stack_Underflow);
+  int status = SUCCESS;
+
+  if ((status = pop(&value)) != SUCCESS) {
+    return status;
   }
+  push(value);
+  return push(value);
 }
 
-static void calcSwap(void) {
+static int calcSwap(void) {
   int a = 0;
   int b = 0;
+  int status = SUCCESS;
 
-  if ((pop(&a) == SUCCESS) && (pop(&b) == SUCCESS)) {
-    push(a);
-    push(b);
-  } else {
-    handle_error(ERR_Stack_Underflow);
+  if ((status = pop(&a)) != SUCCESS) {
+    return status;
   }
+  if ((status = pop(&b)) != SUCCESS) {
+    return status;
+  }
+  push(a);
+  return push(b);
 }
 
 static void intToString(int num, char *s) {
@@ -257,24 +235,27 @@ static void intToString(int num, char *s) {
   int negative = 0;
 
   if (num == 0) {
-    s[i] = '0';
-    i = (i + 1);
+    s[i++] = '0';
     s[i] = '\0';
-  } else {
-    if (num < 0) {
-      negative = 1;
-    }
+    return;
+  }
+
+  if (num < 0) {
+    negative = 1;
   }
 
   while (num != 0) {
-    s[i] = (int)(abs(num % 10) + '0');
-    i = (i + 1);
-    num = (num / 10);
+    int rem = num % 10;
+    if (rem < 0) {
+      s[i++] = (char)((-rem) + '0');
+    } else {
+      s[i++] = (char)(rem + '0');
+    }
+    num = num / 10;
   }
 
   if (negative != 0) {
-    s[i] = '-';
-    i = (i + 1);
+    s[i++] = '-';
   }
   s[i] = '\0';
 
@@ -284,7 +265,7 @@ static void intToString(int num, char *s) {
     char temp = s[start];
     s[start] = s[end];
     s[end] = temp;
-    start = (start + 1);
-    end = (end - 1);
+    start++;
+    --end;
   }
 }

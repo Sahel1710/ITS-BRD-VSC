@@ -12,26 +12,19 @@ void handle_error(int errCode) {
     
     setErrMode();
     switch(errCode) {
-        case ERR_Overflow:
-            printStdout("Error: Overflow detected.");
-            break;
-        case ERR_Underflow:
-            printStdout("Error: Underflow detected.");
-            break;
-        case ERR_Stack_Overflow:
-            printStdout("Error: Stack overflow.");
-            break;
-        case ERR_Stack_Underflow:
-            printStdout("Error: Stack underflow.");
-            break;
+        case ERR_OVERFLOW:
+            return printStdout("Error: Overflow detected. Press 'C' to reset.\n");
+        case ERR_UNDERFLOW:
+            return printStdout("Error: Underflow detected. Press 'C' to reset.\n");
+        case ERR_STACK_OVERFLOW:
+            return printStdout("Error: Stack overflow. Press 'C' to reset.\n");
+        case ERR_STACK_UNDERFLOW:
+            return printStdout("Error: Stack underflow. Press 'C' to reset.\n");
         case ERR_DIV_BY_ZERO:
-            printStdout("Error: Division by zero.");
-            break;
+            return printStdout("Error: Division by zero. Press 'C' to reset.\n");
         default:
-            printStdout("Error: Unknown error code.");
+            return printStdout("Error: Unknown error code. Press 'C' to reset.\n");
     }
-
-    printStdout("Press 'C' to reset.\n");
 
     do {
         tok = nextToken();
