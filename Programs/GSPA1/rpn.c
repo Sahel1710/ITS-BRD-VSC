@@ -4,6 +4,7 @@
 #include "scanner.h"
 #include "stack.h"
 #include <limits.h>
+#include <stdlib.h>
 #include "error_codes.h"
 
 #define TRUE 1
@@ -252,10 +253,9 @@ static void calcSwap(void) {
   }
 }
 
-static void intToString(int value, char *s) {
+static void intToString(int num, char *s) {
   int i = 0;
   int negative = 0;
-  long num = (long)value;
 
   if (num == 0) {
     s[i] = '0';
@@ -264,12 +264,11 @@ static void intToString(int value, char *s) {
   } else {
     if (num < 0) {
       negative = 1;
-      num = -num;
     }
   }
 
-  while (num > 0) {
-    s[i] = (int)((num % 10) + '0');
+  while (num != 0) {
+    s[i] = (int)(abs(num % 10) + '0');
     i = (i + 1);
     num = (num / 10);
   }
