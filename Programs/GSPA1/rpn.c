@@ -19,8 +19,7 @@ static void calcPrintAll(void);
 static void calcClear(void);
 static void calcDuplicate(void);
 static void calcSwap(void);
-static void intToString(int value, char *s);
-
+static void intToString(int num, char *s);
 static int addOverflow(int a, int b);
 static int subOverflow(int a, int b);
 static int multOverflow(int a, int b);
