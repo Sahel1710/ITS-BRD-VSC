@@ -138,10 +138,10 @@ static int addOverflow(int a, int b) {
 }
 
 static int subOverflow(int a, int b) {
-  if ((b < 0) && (a > (INT_MAX + b))) {
+  if ((a < 0) && (b > (INT_MAX + a))) {
     return ERR_OVERFLOW;
   }
-  if ((b > 0) && (a < (INT_MIN + b))) {
+  if ((a > 0) && (b < (INT_MIN + a))) {
     return ERR_UNDERFLOW;
   }
   return SUCCESS;
